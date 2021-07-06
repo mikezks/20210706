@@ -1,7 +1,7 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {Flight} from '../models/flight';
 
 
@@ -16,7 +16,35 @@ export class FlightService {
 
   reqDelay = 1000;
 
+  myFlights: Flight[] = [];
+  myNumber: number;
+  secoundReqFlights: Flight[] = [];
+
+  callback: (num: number) => void;
+
   constructor(private http: HttpClient) {
+
+    /* this.callback = (num: number) => {
+
+      this.myNumber = num;
+    }
+
+    this.find('Graz', 'Hamburg')
+      .subscribe(
+        numberValue => { // 4711
+          this.myNumber = numberValue;
+        }
+      );
+
+    const from = this.myFlights[0].from;
+    const to = this.myFlights[0].to;
+
+    this.find(from, to)
+      .subscribe(
+        flights => {
+          this.secoundReqFlights = flights;
+        }
+      ); */
   }
 
   load(from: string, to: string, urgent: boolean): void {
@@ -27,6 +55,8 @@ export class FlightService {
         },
         err => console.error('Error loading flights', err)
       );
+
+    /* this.callback(1234); */
   }
 
   find(from: string, to: string, urgent: boolean = false): Observable<Flight[]> {
@@ -51,6 +81,15 @@ export class FlightService {
     return this.http.get<Flight[]>(url, {params, headers});
     // return of(flights).pipe(delay(this.reqDelay))
 
+    /* return of([
+      {
+        id: 999,
+        from: 'London',
+        to: 'New York',
+        date: '',
+        delayed: true
+      }
+    ]); */
   }
 
   findById(id: string): Observable<Flight> {
