@@ -24,6 +24,17 @@ export class FlightTypeaheadComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // this.rxjsDemo();
 
+    const loadFlights$ = (city: string) => of(city).pipe(
+      // Side-Effect: set loading flag
+      tap(() => this.loading = true),
+      // Switch to Stream 2
+      switchMap(city => this.load(city)),
+      // Side-Effect: set loading flag
+      tap(() => this.loading = false)
+    );
+
+    const emptyFlightsArray$ = () => of([]);
+
     // Stream 3: Result to render in Template
     this.flights$ =
       // Stream 1: Input field changes
@@ -39,16 +50,9 @@ export class FlightTypeaheadComponent implements OnInit, OnDestroy {
           iif(
             () => city.length > 2,
             // Path 1 resp. condition true: HTTP call
-            of(city).pipe(
-              // Side-Effect: set loading flag
-              tap(() => this.loading = true),
-              // Switch to Stream 2
-              switchMap(city => this.load(city)),
-              // Side-Effect: set loading flag
-              tap(() => this.loading = false)
-            ),
+            loadFlights$(city),
             // Path 2 resp. condition false: Empty array
-            of([])
+            emptyFlightsArray$()
           )
         )
       );
