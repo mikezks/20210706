@@ -2,7 +2,7 @@ import { HttpParams, HttpHeaders, HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Flight } from '@flight-workspace/flight-lib';
-import { combineLatest, Observable, of, Subject, Subscription, timer } from 'rxjs';
+import { combineLatest, iif, Observable, of, Subject, Subscription, timer } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map, share, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 @Component({
@@ -26,31 +26,31 @@ export class FlightTypeaheadComponent implements OnInit, OnDestroy {
 
     // Stream 3: Result to render in Template
     this.flights$ =
-      /* combineLatest([
-        this.control.valueChanges,
-        of(true)
-      ]) */
       // Stream 1: Input field changes
       // Trigger
       // Data Provider
       this.control.valueChanges.pipe(
-        /* control$ => combineLatest([
-          control$,
-          of(true)
-        ]), */
-        /* filter(([_, online]) => online),
-        map(([city, _]) => city), */
         // Filter START
-        filter(city => city.length > 2),
         debounceTime(300),
         distinctUntilChanged(),
         // Filter END
-        // Side-Effect: set loading flag
-        tap(() => this.loading = true),
-        // Switch to Stream 2
-        switchMap(city => this.load(city)),
-        // Side-Effect: set loading flag
-        tap(() => this.loading = false)
+        switchMap(city =>
+          // Observable pathes
+          iif(
+            () => city.length > 2,
+            // Path 1 resp. condition true: HTTP call
+            of(city).pipe(
+              // Side-Effect: set loading flag
+              tap(() => this.loading = true),
+              // Switch to Stream 2
+              switchMap(city => this.load(city)),
+              // Side-Effect: set loading flag
+              tap(() => this.loading = false)
+            ),
+            // Path 2 resp. condition false: Empty array
+            of([])
+          )
+        )
       );
   }
 
