@@ -2,8 +2,8 @@ import { HttpParams, HttpHeaders, HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Flight } from '@flight-workspace/flight-lib';
-import { Observable, Subject, Subscription, timer } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, share, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of, Subject, Subscription, timer } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map, share, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'flight-workspace-flight-typeahead',
@@ -26,10 +26,20 @@ export class FlightTypeaheadComponent implements OnInit, OnDestroy {
 
     // Stream 3: Result to render in Template
     this.flights$ =
+      /* combineLatest([
+        this.control.valueChanges,
+        of(true)
+      ]) */
       // Stream 1: Input field changes
       // Trigger
       // Data Provider
       this.control.valueChanges.pipe(
+        /* control$ => combineLatest([
+          control$,
+          of(true)
+        ]), */
+        /* filter(([_, online]) => online),
+        map(([city, _]) => city), */
         // Filter START
         filter(city => city.length > 2),
         debounceTime(300),
