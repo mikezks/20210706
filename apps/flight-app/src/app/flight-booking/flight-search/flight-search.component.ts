@@ -28,9 +28,7 @@ export class FlightSearchComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.flights$ = this.store.select(
-      state => state[fromFlightBooking.flightBookingFeatureKey].flights
-    );
+    this.flights$ = this.store.select(fromFlightBooking.selectActiveUserFlights);
   }
 
   search(): void {
