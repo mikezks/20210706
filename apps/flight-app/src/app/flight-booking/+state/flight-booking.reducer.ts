@@ -20,6 +20,11 @@ export const reducer = createReducer(
     const flights = action.flights;
     return { ...state, flights };
   }),
-
+  on(FlightBookingActions.flightsUpdate, (state, action) => {
+    const flights = state.flights.map(
+      flight => flight.id === action.flight.id ? action.flight : flight
+    );
+    return { ...state, flights };
+  }),
 );
 
