@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as FlightBookingActions from './flight-booking.actions';
 import { FlightService } from '@flight-workspace/flight-lib';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 
 @Injectable()
@@ -16,9 +17,11 @@ export class FlightBookingEffects {
       // Filter
       ofType(FlightBookingActions.flightsLoad),
       // Switch to 2nd Stream: Load Flights
-      switchMap(action => this.flightService.find(action.from, action.to)),
-      // Type conversion: Flight[] -> Action flightsLoaded
-      map(flights => FlightBookingActions.flightsLoaded({ flights }))
+      switchMap(action => this.flightService.find(action.from, action.to).pipe(
+        // Type conversion: Flight[] -> Action flightsLoaded
+        map(flights => FlightBookingActions.flightsLoaded({ flights })),
+        catchError(err => of(FlightBookingActions.flightsLoadedFailure({ error: err })))
+      ))
     )
   );
 
